@@ -1,13 +1,16 @@
 import { LuaParser } from "./parser/luaParser";
+import { DialogJsonData, Segment } from "./data/dialogJsonData";
+import { DialogTxtData } from "./data/dialogTxtData";
+
 import { TextDocument } from "vscode";
-import { fstat, stat } from "fs";
+import { stat, readFileSync } from "fs";
+import { DialogTxtParser } from "./parser/dialogTxtParser";
 
-export class DialogLine
+
+export interface DialogLine
 {
-    constructor()
-    {
-
-    }
+    dialogJsonData : DialogJsonData;
+    dialogTxtData : DialogTxtData;
 }
 
 export class Dialog
@@ -23,15 +26,35 @@ export class Dialog
     dialogJsonMTime : Date = new Date();
     dialogTxtMTime : Date = new Date();
 
-    dialogLines: DialogLine[] = [];
+    dialogLines: Map<string, DialogLine> = new Map<string, DialogLine>();
+
+    dialogJsonData: DialogJsonData | undefined;
+    dialogTxtData: DialogTxtData | undefined;
 
     newDialogFiles : boolean = true;
 
-    readDialogJson() {
+    readDialogJson()
+    {
+        let data = readFileSync(this.dialogPath + Dialog.JSON_FILENAME).toString();
 
-        
+        if (data)
+        {
+            this.dialogJsonData = JSON.parse(data);
+        }
+        else
+        {
+            this.dialogJsonData = undefined;
+        }
+    }
 
-        //JSON.parse()
+    readDialogTxt()
+    {
+        this.dialogTxtData = DialogTxtParser.parse(this.dialogPath + Dialog.TXT_FILENAME);
+    }
+
+    updateDialogLines()
+    {
+       
     }
 
     update(doc: TextDocument) 
@@ -56,7 +79,8 @@ export class Dialog
 
                 if (this.newDialogFiles === true || this.dialogJsonMTime.getTime() !== stats.mtime.getTime())
                 {
-                    console.log("Update json");
+                    // load and parse json data
+                    this.readDialogJson();
 
                     this.dialogJsonMTime = stats.mtime;
                 }
@@ -71,7 +95,8 @@ export class Dialog
 
                 if (this.newDialogFiles === true || this.dialogTxtMTime.getTime() !== stats.mtime.getTime())
                 {
-                    console.log("Update txt");
+                    // load and parse txt data
+                    this.readDialogTxt();
 
                     this.dialogTxtMTime = stats.mtime;
                 }
