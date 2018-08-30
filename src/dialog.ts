@@ -16,10 +16,12 @@ export interface DialogLine
 export class Dialog
 {
 /// static
+
     static instance : Dialog | undefined;
 
     public static JSON_FILENAME = "/dialog.json";
     public static TXT_FILENAME = "/dialog.txt";
+
 
 /// fields
 
@@ -34,6 +36,7 @@ export class Dialog
     private dialogTxtData: txtData.DialogTxtData | undefined;
 
     private newDialogFiles : boolean = true;
+
 
 /// public methods
 
@@ -94,6 +97,7 @@ export class Dialog
 
     public getDialogPath() { return this.dialogPath; }
 
+    
 /// private methods
 
     private readDialogJson()
