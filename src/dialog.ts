@@ -93,10 +93,17 @@ export class Dialog
         }
     }
 
+    // get dialog json data
+    public getDialogJsonData() { return this.dialogJsonData; }
+
+    // get dialog txt data
+    public getDialogTxtData() { return this.dialogTxtData; }
+
+    // get dialog line with specified id
     public getDialogLine(id: string) { return this.dialogLines.get(id); }
 
+    // get path to dialog directory
     public getDialogPath() { return this.dialogPath; }
-
     
 /// private methods
 
