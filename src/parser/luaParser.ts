@@ -4,11 +4,10 @@ import { dirname } from 'path';
 
 export class LuaParser
 {
-
-    static GetDlgPath(doc: TextDocument)
+    static getDialogDirectory(doc: TextDocument) : string | undefined
     {
          // create regex
-        let regex = /[\t ]*dialog:load\([\t ]*\"(.*)\"[\t ]*\);?[\t ]*/;
+        let regex = /[\t ]*Dialog.load\([\t ]*\"(.*)\"[\t ]*\);?[\t ]*/;
 
         // get match from regex
         var result = regex.exec(doc.getText());
@@ -20,7 +19,9 @@ export class LuaParser
             let dirPath = dirname(doc.fileName);
 
             // create file path to dialog.dlg
-            return dirPath + "/" + result[1];
+            return dirPath;// + "/" + result[1];
         }
+
+        return undefined;
     }
 }
