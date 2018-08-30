@@ -1,5 +1,5 @@
 import { TextDocument } from "vscode";
-import { stat, readFileSync, statSync } from "fs";
+import { readFileSync, statSync } from "fs";
 import { DialogTxtParser } from "./parser/dialogTxtParser";
 
 import { LuaParser } from "./parser/luaParser";
@@ -69,7 +69,7 @@ export class Dialog
 
             // check if `dialog.txt` have changed
             {
-                let stats = statSync(this.dialogPath + Dialog.TXT_FILENAME)
+                let stats = statSync(this.dialogPath + Dialog.TXT_FILENAME);
             
                 if (stats)
                 {
