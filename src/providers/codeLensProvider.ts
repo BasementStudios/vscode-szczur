@@ -18,7 +18,6 @@ export class CodeLensProvider implements vscode.CodeLensProvider
         // create regex object
         const regex = /dialog:run\([\t ]*\"(.*)\"[\t ]*\)/g;
 
-        
         let result;
 
         // find every `runText`
@@ -41,14 +40,14 @@ export class CodeLensProvider implements vscode.CodeLensProvider
             // if array exists
             if (dialogLine !== undefined)
             {
-                var characters = "";
+                let characters: string[] = [];
 
-                dialogLine.jsonSegment.characters.forEach(element => {
-                    characters += element.name + ", ";
+                dialogLine.jsonSegment.characters.forEach((character) => {
+                    characters.push(character.name);
                 });
 
                 // create codeLens and add to array
-                let codeLens = new vscode.CodeLens(line.range, { command: "", title: characters });
+                let codeLens = new vscode.CodeLens(line.range, { command: "", title: characters.join(", ") });
                 codeLensArr.push(codeLens);
             }
         }
