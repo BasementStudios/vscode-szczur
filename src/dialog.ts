@@ -1,25 +1,27 @@
-import { LuaParser } from "./parser/luaParser";
-import { DialogJsonData, Segment } from "./data/dialogJsonData";
-import { DialogTxtData } from "./data/dialogTxtData";
-
 import { TextDocument } from "vscode";
 import { stat, readFileSync } from "fs";
 import { DialogTxtParser } from "./parser/dialogTxtParser";
 
+import { LuaParser } from "./parser/luaParser";
+
+import * as jsonData from "./data/dialogJsonData";
+import * as txtData  from "./data/dialogTxtData";
 
 export interface DialogLine
 {
-    dialogJsonData : DialogJsonData;
-    dialogTxtData : DialogTxtData;
+    jsonSegment : jsonData.Segment;
+    txtSegment : txtData.Segment;
 }
 
 export class Dialog
 {
+/// static
     static instance : Dialog | undefined;
 
     public static JSON_FILENAME = "/dialog.json";
     public static TXT_FILENAME = "/dialog.txt";
 
+/// fields
 
     dialogPath: string | undefined;
 
@@ -28,36 +30,14 @@ export class Dialog
 
     dialogLines: Map<string, DialogLine> = new Map<string, DialogLine>();
 
-    dialogJsonData: DialogJsonData | undefined;
-    dialogTxtData: DialogTxtData | undefined;
+    dialogJsonData: jsonData.DialogJsonData | undefined;
+    dialogTxtData: txtData.DialogTxtData | undefined;
 
     newDialogFiles : boolean = true;
 
-    readDialogJson()
-    {
-        let data = readFileSync(this.dialogPath + Dialog.JSON_FILENAME).toString();
+/// public methods
 
-        if (data)
-        {
-            this.dialogJsonData = JSON.parse(data);
-        }
-        else
-        {
-            this.dialogJsonData = undefined;
-        }
-    }
-
-    readDialogTxt()
-    {
-        this.dialogTxtData = DialogTxtParser.parse(this.dialogPath + Dialog.TXT_FILENAME);
-    }
-
-    updateDialogLines()
-    {
-       
-    }
-
-    update(doc: TextDocument) 
+    public update(doc: TextDocument) 
     {
         let newDialogPath = LuaParser.getDialogDirectory(doc);
 
@@ -103,6 +83,60 @@ export class Dialog
             });
 
             this.newDialogFiles = false;
+
+            // update dialog lines
+            this.updateDialogLines();
+        }
+    }
+
+    public getDialogLine(id: string) : DialogLine | undefined
+    {
+        return this.dialogLines.get(id);
+    }
+
+/// private methods
+
+    private readDialogJson()
+    {
+        let data = readFileSync(this.dialogPath + Dialog.JSON_FILENAME).toString();
+
+        if (data)
+        {
+            this.dialogJsonData = JSON.parse(data);
+        }
+        else
+        {
+            this.dialogJsonData = undefined;
+        }
+    }
+
+    private readDialogTxt()
+    {
+        this.dialogTxtData = DialogTxtParser.parse(this.dialogPath + Dialog.TXT_FILENAME);
+    }
+
+    private updateDialogLines()
+    {
+        // reset all dialog lines
+        this.dialogLines.clear();
+
+        if (this.dialogTxtData !== undefined && this.dialogJsonData !== undefined)
+        {
+            let dialogJsonData = this.dialogJsonData;
+
+            this.dialogTxtData.segments.forEach(txtSegment => {
+
+                let jsonSegment = dialogJsonData.segments.find((segment : jsonData.Segment) => { return segment.ID === txtSegment.ID; });
+
+                if (jsonSegment !== undefined)
+                {
+                    let dialogLine = <DialogLine> {};
+                    dialogLine.txtSegment = txtSegment;
+                    dialogLine.jsonSegment = jsonSegment;
+
+                    this.dialogLines.set(txtSegment.ID, dialogLine);
+                }
+            });
         }
     }
 
