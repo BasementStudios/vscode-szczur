@@ -31,6 +31,12 @@ export class HoverProvider implements vscode.HoverProvider
             result += ": " + element.text + "\n\n";
         });
 
+        let jsonPath = Dialog.getInstance().getDialogPath() + Dialog.JSON_FILENAME;
+        let textPath = Dialog.getInstance().getDialogPath() + Dialog.TXT_FILENAME;
+
+        result += "[dialog.json](file:" + jsonPath + ")";
+        result += " | ";
+        result += "[dialog.txt](file:" + textPath + ")";
         return result;
     }
 
