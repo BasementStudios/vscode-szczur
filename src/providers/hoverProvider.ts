@@ -1,40 +1,35 @@
 import * as vscode from 'vscode';
 
-import { DlgParser } from '../parser/dlgParser';
-import { LuaParser } from '../parser/luaParser';
+import { Dialog } from '../dialog';
 
 export class HoverProvider implements vscode.HoverProvider 
 {
-   dlgParser: DlgParser = new DlgParser();
-
    provideHover(doc: vscode.TextDocument, pos: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Hover> 
    {
+        let dialog = Dialog.getInstance();
+        dialog.update(doc);
+        
+        const regex = /dialog:run\([\t ]*\"(.*)\"[\t ]*\)/;
+
         let line = doc.lineAt(pos.line).text;
-        let regex = /^[\t ]*dialog:runText\([\t ]*(\d+)[\t ]*,[\t ]*(\d+)[\t ]*\);?[\t ]*$/;
         let result = regex.exec(line);
         if (result !== null) 
         {
-            // get path to dlg from lua
-            let path = LuaParser.GetDlgPath(doc);
+            let id = result[1];
 
-            if (path !== undefined)
+            let dialogLine = dialog.getDialogLine(id);
+
+            if (dialogLine !== undefined)
             {
-                // parse dlg
-                this.dlgParser.parseFile(path);
-            }
-            else
-            {
-                return null;
+                let str = "";
+
+                dialogLine.txtSegment.texts.forEach(element => {
+                    str += "[" + element.ID + "]: " + element.text + "\n\n";
+                });
+
+                return new vscode.Hover(str);
             }
 
-            let major = result[1];
-            let minor = result[2];
-            let findResult = this.dlgParser.options.find(option => option.isEqual(major, minor));
-            
-            if (findResult !== undefined) 
-            {
-                return new vscode.Hover(findResult.title);
-            }
             return null;
         }
         return null;
