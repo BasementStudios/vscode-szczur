@@ -23,17 +23,17 @@ export class Dialog
 
 /// fields
 
-    dialogPath: string | undefined;
+    private dialogPath: string | undefined;
 
-    dialogJsonMTime : Date = new Date();
-    dialogTxtMTime : Date = new Date();
+    private dialogJsonMTime : Date = new Date();
+    private dialogTxtMTime : Date = new Date();
 
-    dialogLines: Map<string, DialogLine> = new Map<string, DialogLine>();
+    private dialogLines: Map<string, DialogLine> = new Map<string, DialogLine>();
 
-    dialogJsonData: jsonData.DialogJsonData | undefined;
-    dialogTxtData: txtData.DialogTxtData | undefined;
+    private dialogJsonData: jsonData.DialogJsonData | undefined;
+    private dialogTxtData: txtData.DialogTxtData | undefined;
 
-    newDialogFiles : boolean = true;
+    private newDialogFiles : boolean = true;
 
 /// public methods
 
@@ -89,10 +89,9 @@ export class Dialog
         }
     }
 
-    public getDialogLine(id: string) : DialogLine | undefined
-    {
-        return this.dialogLines.get(id);
-    }
+    public getDialogLine(id: string) { return this.dialogLines.get(id); }
+
+    public getDialogPath() { return this.dialogPath; }
 
 /// private methods
 
