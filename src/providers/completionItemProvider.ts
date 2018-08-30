@@ -22,22 +22,25 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider
             if (dialogTxtData !== undefined)
             {
                 // foreach segment in dialogTxtData
-                dialogTxtData.segments.forEach((segment) => {
-
-                    // create new completion item
-                    let completionItem = new vscode.CompletionItem("\"" + segment.ID + "\"", vscode.CompletionItemKind.Value);
-
+                for (let segment of dialogTxtData.segments)
+                {
                     // foreach text in segment
-                    segment.texts.forEach((text) => {
-
+                    for (let text of segment.texts)
+                    {
                         // if segment is for addOption
                         if (text.ID === ">")
                         {
+                            // create new completion item
+                            let completionItem = new vscode.CompletionItem("\"" + segment.ID + "\"", vscode.CompletionItemKind.Value);
+
                             completionItem.detail = text.text;
                             list.items.push(completionItem);
+
+                            // break if found
+                            break;
                         }
-                    });
-                });
+                    }
+                }
             }
         }
 
