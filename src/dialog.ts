@@ -1,5 +1,5 @@
 import { TextDocument } from "vscode";
-import { stat, readFileSync } from "fs";
+import { stat, readFileSync, statSync } from "fs";
 import { DialogTxtParser } from "./parser/dialogTxtParser";
 
 import { LuaParser } from "./parser/luaParser";
@@ -51,37 +51,38 @@ export class Dialog
         if (newDialogPath !== undefined)
         {
             // check if `dialog.json` have changed
-            stat(this.dialogPath + Dialog.JSON_FILENAME, (err, stats) => {
-                if (err)
+            {
+                let stats = statSync(this.dialogPath + Dialog.JSON_FILENAME);
+                
+                if (stats)
                 {
-                    throw err;
-                }
+                    if (this.newDialogFiles === true || this.dialogJsonMTime.getTime() !== stats.mtime.getTime())
+                    {
+                        // load and parse json data
+                        this.readDialogJson();
 
-                if (this.newDialogFiles === true || this.dialogJsonMTime.getTime() !== stats.mtime.getTime())
-                {
-                    // load and parse json data
-                    this.readDialogJson();
-
-                    this.dialogJsonMTime = stats.mtime;
+                        this.dialogJsonMTime = stats.mtime;
+                    }           
                 }
-            });
+            }
+ 
 
             // check if `dialog.txt` have changed
-            stat(this.dialogPath + Dialog.TXT_FILENAME, (err, stats) => {
-                if (err)
+            {
+                let stats = statSync(this.dialogPath + Dialog.TXT_FILENAME)
+            
+                if (stats)
                 {
-                    throw err;
+                    if (this.newDialogFiles === true || this.dialogTxtMTime.getTime() !== stats.mtime.getTime())
+                    {
+                        // load and parse txt data
+                        this.readDialogTxt();
+
+                        this.dialogTxtMTime = stats.mtime;
+                    }
                 }
-
-                if (this.newDialogFiles === true || this.dialogTxtMTime.getTime() !== stats.mtime.getTime())
-                {
-                    // load and parse txt data
-                    this.readDialogTxt();
-
-                    this.dialogTxtMTime = stats.mtime;
-                }
-            });
-
+            }
+            
             this.newDialogFiles = false;
 
             // update dialog lines
