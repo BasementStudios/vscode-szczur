@@ -37,17 +37,33 @@ export class CodeLensProvider implements vscode.CodeLensProvider
             
             let dialogLine = dialog.getDialogLine(id);
 
-            // if array exists
+            // if dialog line exists
             if (dialogLine !== undefined)
             {
-                let characters: string[] = [];
+                let text: string;
 
-                dialogLine.jsonSegment.characters.forEach((character) => {
-                    characters.push(character.name);
-                });
+                // if data from json exists
+                if (dialogLine.jsonSegment !== undefined)
+                {
+                    let characters: string[] = [];
+
+                    // show all characters in this segment
+                    dialogLine.jsonSegment.characters.forEach((character) => {
+                        characters.push(character.name);
+                    });
+
+                    text = characters.join(", ");
+                }
+                else
+                {
+                    // show first line of segment
+                    let textLine = dialogLine.txtSegment.texts[0];
+
+                    text = "[" + textLine.ID + "]: " + textLine.text;
+                }
 
                 // create codeLens and add to array
-                let codeLens = new vscode.CodeLens(line.range, { command: "", title: characters.join(", ") });
+                let codeLens = new vscode.CodeLens(line.range, { command: "", title: text });
                 codeLensArr.push(codeLens);
             }
         }

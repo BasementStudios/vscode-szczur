@@ -9,7 +9,7 @@ import * as txtData  from "./data/dialogTxtData";
 
 export interface DialogLine
 {
-    jsonSegment : jsonData.Segment;
+    jsonSegment : jsonData.Segment | undefined;
     txtSegment : txtData.Segment;
 }
 
@@ -139,14 +139,12 @@ export class Dialog
 
                 let jsonSegment = dialogJsonData.segments.find((segment : jsonData.Segment) => { return segment.ID === txtSegment.ID; });
 
-                if (jsonSegment !== undefined)
-                {
-                    let dialogLine = <DialogLine> {};
-                    dialogLine.txtSegment = txtSegment;
-                    dialogLine.jsonSegment = jsonSegment;
+            
+                let dialogLine = <DialogLine> {};
+                dialogLine.txtSegment = txtSegment;
+                dialogLine.jsonSegment = jsonSegment;
 
-                    this.dialogLines.set(txtSegment.ID, dialogLine);
-                }
+                this.dialogLines.set(txtSegment.ID, dialogLine);
             });
         }
     }
