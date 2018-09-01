@@ -6,17 +6,10 @@ export class CodeLensProvider implements vscode.CodeLensProvider
 {
    // dlgParser:DlgParser = new DlgParser();
 
-    onDidChangeCodeLenses?: vscode.Event<void> | undefined;   
-    provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.CodeLens[]> 
-    {
-        // create empty array
-        var codeLensArr:vscode.CodeLens[] = [];
 
-        let dialog = Dialog.getInstance();
-        dialog.update(document);
-        
-        // create regex object
-        const regex = /dialog:run\([\t ]*\"(.*)\"[\t ]*\)/g;
+    private getCodeLens(regex : RegExp, dialog : Dialog, document : vscode.TextDocument)  : vscode.CodeLens[]
+    {
+        var codeLensArr:vscode.CodeLens[] = [];
 
         let result;
 
@@ -42,24 +35,32 @@ export class CodeLensProvider implements vscode.CodeLensProvider
             {
                 let text: string;
 
-                // if data from json exists
-                if (dialogLine.jsonSegment !== undefined)
+                // if line is `dialog:addOption`
+                if (dialogLine.txtSegment.texts.length > 0 && dialogLine.txtSegment.texts[0].ID === ">")
                 {
-                    let characters: string[] = [];
-
-                    // show all characters in this segment
-                    dialogLine.jsonSegment.characters.forEach((character) => {
-                        characters.push(character.name);
-                    });
-
-                    text = characters.join(", ");
+                    text = dialogLine.txtSegment.texts[0].text;
                 }
-                else
+                else // if line is `dialog:run`
                 {
-                    // show first line of segment
-                    let textLine = dialogLine.txtSegment.texts[0];
+                    // if data from json exists
+                    if (dialogLine.jsonSegment !== undefined)
+                    {
+                        let characters: string[] = [];
 
-                    text = "[" + textLine.ID + "]: " + textLine.text;
+                        // show all characters in this segment
+                        dialogLine.jsonSegment.characters.forEach((character) => {
+                            characters.push(character.name);
+                        });
+
+                        text = characters.join(", ");
+                    }
+                    else
+                    {
+                        // show first line of segment
+                        let textLine = dialogLine.txtSegment.texts[0];
+
+                        text = "[" + textLine.ID + "]: " + textLine.text;
+                    }
                 }
 
                 // create codeLens and add to array
@@ -68,7 +69,22 @@ export class CodeLensProvider implements vscode.CodeLensProvider
             }
         }
 
-        //console.log("Update: " + lens.length);
+
+        return codeLensArr;
+    }
+
+    onDidChangeCodeLenses?: vscode.Event<void> | undefined;   
+    provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.CodeLens[]> 
+    {
+        // create empty array
+        var codeLensArr:vscode.CodeLens[] = [];
+
+        let dialog = Dialog.getInstance();
+        dialog.update(document);
+        
+        // get codelens for `dialog:run` and `dialog:addOption`
+        codeLensArr = codeLensArr.concat(this.getCodeLens(/dialog:run\([\t ]*\"(.*)\"[\t ]*\)/g, dialog, document));
+        codeLensArr = codeLensArr.concat(this.getCodeLens(/dialog:addOption\([\t ]*\"(.*)\"[\t ]*\)/g, dialog, document));
 
         return codeLensArr;
     }
